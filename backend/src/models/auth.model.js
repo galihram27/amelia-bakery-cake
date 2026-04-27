@@ -1,37 +1,46 @@
 /*
-    CREATE TALBE users (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        name VARCHAR(100) NOT NULL,
-        username VARCHAR(100) NOT NULL UNIQUE,
-        password VARCHAR(100) NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
+  CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    username VARCHAR(100) NOT NULL,
+    password VARCHAR(100) NOT NULL,
+    phone VARCHAR(20) NOT NULL,
+    address TEXT,
+    role ENUM('user', 'admin') DEFAULT 'user',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
 */
 
-const db = require("../config/db");
+import db from "../config/db.js";
 
 // GET username
-exports.getUser = async (username) => {
-  const [row] = await db.execute("SELECT * FROM users WHERE username = ?", [
+export const findUserByUsername = async (username) => {
+  const [rows] = await db.execute("SELECT * FROM users WHERE username = ?", [
     username,
   ]);
 
-  return row[0];
+  return rows[0];
 };
 
 // Membuat akun baru
-exports.createUser = async (name, username, password) => {
+export const createUser = async (
+  name,
+  username,
+  password,
+  phone,
+  address = null,
+) => {
   const [result] = await db.execute(
-    "INSERT INTO users (name, username, password) VALUES (?,?,?)",
-    [name, username, password],
+    "INSERT INTO users (name, username, password, phone, address) VALUES (?,?,?,?,?)",
+    [name, username, password, phone, address],
   );
 
   return result;
 };
 
 // Hapus akun user
-exports.deleteUser = async (id) => {
+export const deleteUser = async (id) => {
   const [result] = await db.execute("DELETE FROM users WHERE id = ?", [id]);
 
   return result;

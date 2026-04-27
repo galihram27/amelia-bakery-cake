@@ -1,8 +1,8 @@
-const productService = require("../services/product.service");
-const asyncHandler = require("../middlewares/async.handler");
+import * as productService from "../services/product.service.js";
+import asyncHandler from "../middlewares/async.handler.js";
 
 // Menampilkan produk
-exports.getProduct = asyncHandler(async (req, res, next) => {
+export const getProduct = asyncHandler(async (req, res, next) => {
   const { key_word } = req.query;
 
   const data = await productService.getProduct(key_word);
@@ -11,39 +11,42 @@ exports.getProduct = asyncHandler(async (req, res, next) => {
 });
 
 // Tambah produk baru
-exports.addNewProduct = asyncHandler(async (req, res, next) => {
-  const {
-    name,
-    description = null,
-    price,
-    stock = 0,
-    image = "default.png",
-  } = req.body;
+export const addNewProduct = asyncHandler(async (req, res, next) => {
+  const { name, price, stock = 0, image = "default.png" } = req.body;
 
-  await productService.addNewProduct(name, description, price, stock, image);
+  await productService.addNewProduct(name, price, stock, image);
 
   res.json({ message: "Produk berhasil ditambahkan" });
 });
 
-// Update stok
-exports.updateStock = asyncHandler(async (req, res, next) => {
+// Tambah stok
+export const addStock = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
   const { amount } = req.body;
 
-  await productService.updateStock(amount, id);
+  await productService.addStock(amount, id);
 
-  res.json({ message: "Stok berhasil diupdate" });
+  res.json({ message: "Stok berhasil ditambah" });
+});
+
+// Kurangi stok
+export const reduceStock = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+  const { amount } = req.body;
+
+  await productService.reduceStock(amount, id);
+
+  res.json({ message: "Stok berhasil dikurang" });
 });
 
 // Update produk
-exports.updateProduct = asyncHandler(async (req, res, next) => {
+export const updateProduct = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
-  const { name, description, price, stock, image } = req.body;
+  const { name, price, stock, image } = req.body;
 
-  await productService.updateProduct(
+  await productService.reduceStock(
     id,
     name,
-    description,
     price,
     stock,
     image,
@@ -53,7 +56,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
 });
 
 // Hapus produk
-exports.deleteProduct = asyncHandler(async (req, res, next) => {
+export const deleteProduct = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
 
   await productService.deleteProduct(id);

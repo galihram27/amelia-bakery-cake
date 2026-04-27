@@ -1,9 +1,12 @@
-const express = require("express");
+import express from "express";
+import cors from "cors";
+
+import router from "./routes/index.js";
+import AppError from "./middlewares/app.error.js";
+import errorMiddleware from "./middlewares/error.middleware.js";
+
 const app = express();
-const router = require("./routes/product.route");
-const cors = require("cors");
-const AppError = require('./middlewares/app.error');
-const errorHandler = require("./middlewares/error.handler");
+
 /*
 const helmet = require('helmet');
 
@@ -18,6 +21,6 @@ app.use((req, res, next) => {
     next(new AppError('Route tidak ditemukan', 404));
 });
 
-app.use(errorHandler);
+app.use(errorMiddleware);
 
-module.exports = app;
+export default app;

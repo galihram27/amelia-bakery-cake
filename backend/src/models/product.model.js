@@ -2,7 +2,6 @@
 CREATE TABLE products (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    description TEXT,
     price DECIMAL(10,2) NOT NULL,
     stock INT DEFAULT 0,
     image VARCHAR(255),
@@ -11,10 +10,10 @@ CREATE TABLE products (
 );
 */
 
-const db = require("../config/db");
+import db from "../config/db.js";
 
 // Menampilkan produk
-exports.getProduct = async (key_word = "") => {
+export const getProduct = async (key_word = "") => {
   const [rows] = await db.execute("SELECT * FROM products WHERE name LIKE ?", [
     `%${key_word}%`,
   ]);
@@ -23,20 +22,20 @@ exports.getProduct = async (key_word = "") => {
 };
 
 // Tambah produk baru
-exports.addNewProduct = async (name, description, price, stock, image) => {
+export const addNewProduct = async (name, price, stock, image) => {
   const [result] = await db.execute(
     `
         INSERT INTO products
-        (name, description, price, stock, image)
-        VALUES (?,?,?,?,?)`,
-    [name, description, price, stock, image],
+        (name, price, stock, image)
+        VALUES (?,?,?,?)`,
+    [name, price, stock, image],
   );
 
   return result;
 };
 
 // Tambah stok
-exports.addStock = async (amount, id) => {
+export const addStock = async (amount, id) => {
   const [result] = await db.execute(
     "UPDATE products SET stock = stock + ? WHERE id = ?",
     [amount, id],
@@ -46,7 +45,7 @@ exports.addStock = async (amount, id) => {
 };
 
 // Kurangi stok
-exports.reduceStock = async (amount, id) => {
+export const reduceStock = async (amount, id) => {
   const [result] = await db.execute(
     "UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?",
     [amount, id, amount],
@@ -56,7 +55,7 @@ exports.reduceStock = async (amount, id) => {
 };
 
 // Update produk
-exports.updateProduct = async (fields, values, id) => {
+export const updateProduct = async (fields, values, id) => {
   const sql = `UPDATE products SET ${fields.join(", ")} WHERE id = ?`;
 
   const finalValues = [...values, id];
@@ -67,7 +66,7 @@ exports.updateProduct = async (fields, values, id) => {
 };
 
 // Hapus produk
-exports.deleteProduct = async (id) => {
+export const deleteProduct = async (id) => {
   const [result] = await db.execute("DELETE FROM products WHERE id = ?", [id]);
 
   return result;

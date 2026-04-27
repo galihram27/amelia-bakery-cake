@@ -1,15 +1,15 @@
-const productModel = require("../models/product.model");
-const AppError = require("../middlewares/app.error");
+import * as productModel from "../models/product.model.js";
+import AppError from "../middlewares/app.error.js";
 
 // Menampilkan produk
-exports.getProduct = async (key_word) => {
+export const getProduct = async (key_word) => {
   const data = await productModel.getProduct(key_word);
 
   return data;
 };
 
 // Tambah produk baru
-exports.addNewProduct = async (name, description, price, stock, image) => {
+export const addNewProduct = async (name, price, stock, image) => {
   if (!name) {
     throw new AppError("Nama produk wajib diisi", 400);
   }
@@ -24,7 +24,6 @@ exports.addNewProduct = async (name, description, price, stock, image) => {
 
   const data = await productModel.addNewProduct(
     name,
-    description,
     price,
     stock,
     image,
@@ -37,8 +36,30 @@ exports.addNewProduct = async (name, description, price, stock, image) => {
   return data;
 };
 
-// Update stok
-exports.updateStock = async (amount, id) => {
+// Tambah stok
+export const addStock = async (amount, id) => {
+  const parsedId = Number(id);
+  const parsedAmount = Number(amount);
+
+  if (isNaN(parsedId)) {
+    throw new AppError("ID tidak valid", 400);
+  }
+
+  if (isNaN(parsedAmount) || parsedAmount === 0) {
+    throw new AppError("Jumlah tidak valid", 400);
+  }
+
+  const result = await productModel.addStock(parsedAmount, parsedId);
+
+  if (result.affectedRows === 0) {
+    throw new AppError("Data tidak ditemukan", 404);
+  }
+
+  return result;
+};
+
+// Kurangi stok
+export const reduceStock = async (amount, id) => {
   const parsedId = Number(id);
   const parsedAmount = Number(amount);
 
@@ -47,18 +68,12 @@ exports.updateStock = async (amount, id) => {
   }
 
   if (isNaN(parsedAmount) || parsedAmount <= 0) {
-    throw new AppError("Jumlah harus angka > 0", 400);
+    throw new AppError("Jumlah tidak valid", 400);
   }
 
-  let result;
+  const result = await productModel.reduceStock(parsedAmount, parsedId);
 
-  if (parsedAmount > 0) {
-    result = await productModel.addStock(parsedAmount, parsedId);
-  } else {
-    result = await productModel.reduceStock(Math.abs(parsedAmount), parsedId);
-  }
-
-  if (data.affectedRows === 0) {
+  if (result.affectedRows === 0) {
     throw new AppError("Data tidak ditemukan", 404);
   }
 
@@ -66,7 +81,7 @@ exports.updateStock = async (amount, id) => {
 };
 
 // Update produk
-exports.updateProduct = async (id, name, description, price, stock, image) => {
+export const updateProduct = async (id, name, price, stock, image) => {
   let fields = [];
   let values = [];
 
@@ -76,11 +91,6 @@ exports.updateProduct = async (id, name, description, price, stock, image) => {
   if (name !== undefined) {
     fields.push("name = ?");
     values.push(name);
-  }
-
-  if (description !== undefined) {
-    fields.push("description = ?");
-    values.push(description);
   }
 
   if (parsedPrice !== undefined) {
@@ -120,7 +130,7 @@ exports.updateProduct = async (id, name, description, price, stock, image) => {
 };
 
 // Hapus produk
-exports.deleteProduct = async (id) => {
+export const deleteProduct = async (id) => {
   const parsedId = Number(id);
 
   if (isNaN(parsedId)) {

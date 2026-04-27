@@ -1,20 +1,21 @@
-const productController = require("../controllers/product.controller");
-const express = require("express");
+import express from "express";
+import { authenticate } from "../middlewares/auth.middleware.js"
+import { authorizeRoles } from "../middlewares/role.middleware.js";
+import * as productController from "../controllers/product.controller.js";
+
 const router = express.Router();
 
 // Menampilkan produk
-router.get("/products", productController.getProduct);
+router.get("/", productController.getProduct);
 
-// Tambah produk
-router.post("/products", productController.addNewProduct);
+// Admin only
+router.use(authenticate);
+router.use(authorizeRoles("admin"));
 
-// Update stok
-router.patch("/products/:id/stock", productController.updateStock);
+router.post("/", productController.addNewProduct); // Tambah produk
+router.patch("/:id/stock/add", productController.addStock); // Tambah stok
+router.patch("/:id/stock/reduce", productController.reduceStock); // Kurangi stok
+router.patch("/:id", productController.updateProduct); // Update produk
+router.delete("/:id", productController.deleteProduct); // Hapus produk
 
-// Update produk
-router.patch("/products/:id", productController.updateProduct);
-
-// Hapus produk
-router.delete("/products/:id", productController.deleteProduct);
-
-module.exports = router;
+export default router;
