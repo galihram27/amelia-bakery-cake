@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import { findUserByUsername, createUser } from "../models/auth.model.js";
+import * as authModel from "../repositories/auth.repository.js";
 import AppError from "../middlewares/app.error.js";
 import { generateToken } from "../utils/token.js";
 
@@ -35,7 +35,7 @@ export const register = async (name, username, password, phone, address) => {
   }
 
   // Mengecek apakah akun sudah ada
-  const existingUser = await findUserByUsername(username);
+  const existingUser = await authModel.findUserByUsername(username);
 
   if (existingUser) {
     throw new AppError("Username sudah digunakan", 409);
@@ -43,7 +43,7 @@ export const register = async (name, username, password, phone, address) => {
 
   const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
-  await createUser(name, username, hashedPassword, phone, address);
+  await authModel.createUser(name, username, hashedPassword, phone, address);
 
   return {
     message: "Register berhasil",
@@ -59,7 +59,7 @@ export const login = async (username, password) => {
 
   username = username.trim().toLowerCase();
 
-  const user = await findUserByUsername(username);
+  const user = await authModel.findUserByUsername(username);
 
   if (!user) {
     throw new AppError("Username atau Password salah", 401);
@@ -81,4 +81,78 @@ export const login = async (username, password) => {
     message: "Login berhasil",
     token,
   };
+};
+
+// Update Profile
+export const updateProfile = async (
+  name,
+  username,
+  password,
+  phone,
+  address,
+) => {
+  let fields = [];
+  let values = [];
+
+  if (name !== undefined) {
+    fields.push("name = ?");
+    values.push(name);
+  }
+
+  if (username !== undefined) {
+    fields.push("username = ?");
+    values.push(username);
+  }
+
+  if (password !== undefined) {
+    fields.push("password = ?");
+    values.push(password);
+  }
+
+  if (phone !== undefined) {
+    fields.push("phone = ?");
+    values.push(phone);
+  }
+
+  if (address !== undefined) {
+    fields.push("address = ?");
+    values.push(address);
+  }
+
+  if (fields.length === 0) {
+    throw new AppError("Tidak ada data yang diupdate", 400);
+  }
+
+  if (isNaN(parsedPrice) || parsedPrice <= 0) {
+    throw new AppError("Harga harus angka > 0", 400);
+  }
+
+  if (isNaN(parsedStock) || parsedStock < 0) {
+    throw new AppError("Stock tidak valid", 400);
+  }
+
+  const result = await authModel.updateUser(fields, values, id);
+
+  if (result.affectedRows === 0) {
+    throw new AppError("Data tidak ditemukan", 404);
+  }
+
+  return result;
+};
+
+// Hapus Akun
+export const deleteAccount = async (id) => {
+  const parsedId = Number(id);
+
+  if (isNaN(parsedId)) {
+    throw new AppError("ID tidak valid", 400);
+  }
+
+  const result = await authModel.deleteUser(id);
+
+  if (result.affectedRows === 0) {
+    throw new AppError("Data tidak ditemukan", 404);
+  }
+
+  return result;
 };

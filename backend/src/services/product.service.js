@@ -1,11 +1,11 @@
-import * as productModel from "../models/product.model.js";
+import * as productModel from "../repositories/product.repository.js";
 import AppError from "../middlewares/app.error.js";
 
 // Menampilkan produk
 export const getProduct = async (key_word) => {
-  const data = await productModel.getProduct(key_word);
+  const products = await productModel.getProduct(key_word);
 
-  return data;
+  return products;
 };
 
 // Tambah produk baru
@@ -22,12 +22,7 @@ export const addNewProduct = async (name, price, stock, image) => {
     throw new AppError("Stock tidak valid", 400);
   }
 
-  const data = await productModel.addNewProduct(
-    name,
-    price,
-    stock,
-    image,
-  );
+  const data = await productModel.addNewProduct(name, price, stock, image);
 
   if (data.affectedRows === 0) {
     throw new AppError("Data tidak ditemukan", 404);
@@ -120,13 +115,13 @@ export const updateProduct = async (id, name, price, stock, image) => {
     throw new AppError("Stock tidak valid", 400);
   }
 
-  const data = await productModel.updateProduct(fields, values, id);
+  const result = await productModel.updateProduct(fields, values, id);
 
-  if (data.affectedRows === 0) {
+  if (result.affectedRows === 0) {
     throw new AppError("Data tidak ditemukan", 404);
   }
 
-  return data;
+  return result;
 };
 
 // Hapus produk
@@ -137,11 +132,11 @@ export const deleteProduct = async (id) => {
     throw new AppError("ID tidak valid", 400);
   }
 
-  const data = await productModel.deleteProduct(parsedId);
+  const result = await productModel.deleteProduct(parsedId);
 
-  if (data.affectedRows === 0) {
+  if (result.affectedRows === 0) {
     throw new AppError("Data tidak ditemukan", 404);
   }
 
-  return data;
+  return result;
 };

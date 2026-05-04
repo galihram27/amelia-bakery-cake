@@ -5,9 +5,9 @@ import asyncHandler from "../middlewares/async.handler.js";
 export const getProduct = asyncHandler(async (req, res, next) => {
   const { key_word } = req.query;
 
-  const data = await productService.getProduct(key_word);
+  const products = await productService.getProduct(key_word);
 
-  res.json(data);
+  res.json(products);
 });
 
 // Tambah produk baru
@@ -44,7 +44,7 @@ export const updateProduct = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
   const { name, price, stock, image } = req.body;
 
-  await productService.reduceStock(
+  await productService.updateProduct(
     id,
     name,
     price,

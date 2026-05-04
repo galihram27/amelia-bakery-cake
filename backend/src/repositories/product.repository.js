@@ -1,5 +1,5 @@
 /*
-CREATE TABLE products (
+  CREATE TABLE products (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     price DECIMAL(10,2) NOT NULL,
@@ -7,7 +7,7 @@ CREATE TABLE products (
     image VARCHAR(255),
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+  );
 */
 
 import db from "../config/db.js";

@@ -39,6 +39,17 @@ export const createUser = async (
   return result;
 };
 
+// Update akun user
+export const updateUser = async (fields, values, id) => {
+  const sql = `UPDATE products SET ${fields.join(", ")} WHERE id = ?`;
+
+  const finalValues = [...values, id];
+
+  const [result] = await db.execute(sql, finalValues);
+
+  return result;
+};
+
 // Hapus akun user
 export const deleteUser = async (id) => {
   const [result] = await db.execute("DELETE FROM users WHERE id = ?", [id]);
