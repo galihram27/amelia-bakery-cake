@@ -1,101 +1,162 @@
 import * as productModel from "../repositories/product.repository.js";
 import AppError from "../middlewares/app.error.js";
 
-// Menampilkan produk
-export const getProduct = async (key_word) => {
-  const products = await productModel.getProduct(key_word);
+/* ================= HELPER ================= */
 
-  return products;
+/**
+ * Convert value ke number
+ */
+const toNumber = (value) => Number(value);
+
+/**
+ * Validasi ID (harus angka)
+ */
+const validateId = (id) => {
+  const parsed = toNumber(id);
+
+  if (isNaN(parsed)) {
+    throw new AppError("ID tidak valid", 400);
+  }
+
+  return parsed;
 };
 
-// Tambah produk baru
+/**
+ * Validasi harga (harus angka > 0)
+ */
+const validatePrice = (price) => {
+  const parsed = toNumber(price);
+
+  if (isNaN(parsed) || parsed <= 0) {
+    throw new AppError("Harga harus angka > 0", 400);
+  }
+
+  return parsed;
+};
+
+/**
+ * Validasi stock (tidak boleh negatif)
+ */
+const validateStock = (stock) => {
+  const parsed = toNumber(stock);
+
+  if (isNaN(parsed) || parsed < 0) {
+    throw new AppError("Stock tidak valid", 400);
+  }
+
+  return parsed;
+};
+
+/**
+ * Cek apakah query database berhasil (affectedRows > 0)
+ */
+const checkAffectedRows = (result) => {
+  if (result.affectedRows === 0) {
+    throw new AppError("Data tidak ditemukan", 404);
+  }
+};
+
+/* ================= SERVICES ================= */
+
+/**
+ * Ambil data produk (bisa dengan keyword search)
+ */
+export const getProduct = async (keyword) => {
+  return await productModel.getProduct(keyword);
+};
+
+/**
+ * Tambah produk baru
+ */
 export const addNewProduct = async (name, price, stock, image) => {
+  // Validasi nama wajib diisi
   if (!name) {
     throw new AppError("Nama produk wajib diisi", 400);
   }
 
-  if (typeof price !== "number" || price <= 0) {
-    throw new AppError("Harga harus angka > 0", 400);
-  }
+  // Validasi harga & stock
+  const validPrice = validatePrice(price);
+  const validStock = validateStock(stock);
 
-  if (typeof stock !== "number" || stock < 0) {
-    throw new AppError("Stock tidak valid", 400);
-  }
+  // Insert ke database
+  const result = await productModel.addNewProduct(
+    name,
+    validPrice,
+    validStock,
+    image
+  );
 
-  const data = await productModel.addNewProduct(name, price, stock, image);
+  // Cek apakah insert berhasil
+  checkAffectedRows(result);
 
-  if (data.affectedRows === 0) {
-    throw new AppError("Data tidak ditemukan", 404);
-  }
-
-  return data;
+  return result;
 };
 
-// Tambah stok
+/**
+ * Menambah stock produk
+ */
 export const addStock = async (amount, id) => {
-  const parsedId = Number(id);
-  const parsedAmount = Number(amount);
+  const validId = validateId(id);
+  const validAmount = toNumber(amount);
 
-  if (isNaN(parsedId)) {
-    throw new AppError("ID tidak valid", 400);
-  }
-
-  if (isNaN(parsedAmount) || parsedAmount === 0) {
+  // Validasi jumlah tidak boleh 0 / bukan angka
+  if (isNaN(validAmount) || validAmount === 0) {
     throw new AppError("Jumlah tidak valid", 400);
   }
 
-  const result = await productModel.addStock(parsedAmount, parsedId);
+  const result = await productModel.addStock(validAmount, validId);
 
-  if (result.affectedRows === 0) {
-    throw new AppError("Data tidak ditemukan", 404);
-  }
+  checkAffectedRows(result);
 
   return result;
 };
 
-// Kurangi stok
+/**
+ * Mengurangi stock produk
+ */
 export const reduceStock = async (amount, id) => {
-  const parsedId = Number(id);
-  const parsedAmount = Number(amount);
+  const validId = validateId(id);
+  const validAmount = toNumber(amount);
 
-  if (isNaN(parsedId)) {
-    throw new AppError("ID tidak valid", 400);
-  }
-
-  if (isNaN(parsedAmount) || parsedAmount <= 0) {
+  // Validasi jumlah harus > 0
+  if (isNaN(validAmount) || validAmount <= 0) {
     throw new AppError("Jumlah tidak valid", 400);
   }
 
-  const result = await productModel.reduceStock(parsedAmount, parsedId);
+  const result = await productModel.reduceStock(validAmount, validId);
 
-  if (result.affectedRows === 0) {
-    throw new AppError("Data tidak ditemukan", 404);
-  }
+  checkAffectedRows(result);
 
   return result;
 };
 
-// Update produk
+/**
+ * Update data produk (partial update)
+ * hanya field yang dikirim yang akan diupdate
+ */
 export const updateProduct = async (id, name, price, stock, image) => {
-  let fields = [];
-  let values = [];
+  const validId = validateId(id);
 
-  const parsedPrice = Number(price);
-  const parsedStock = Number(stock);
+  let fields = []; // untuk query SET
+  let values = []; // untuk value query
+
+  // Cek field mana saja yang ingin diupdate
 
   if (name !== undefined) {
     fields.push("name = ?");
     values.push(name);
   }
 
-  if (parsedPrice !== undefined) {
+  if (price !== undefined) {
+    const validPrice = validatePrice(price);
     fields.push("price = ?");
-    values.push(parsedPrice);
+    values.push(validPrice);
   }
 
-  if (parsedStock !== undefined) {
+  if (stock !== undefined) {
+    const validStock = validateStock(stock);
     fields.push("stock = ?");
-    values.push(parsedStock);
+    values.push(validStock);
   }
 
   if (image !== undefined) {
@@ -103,40 +164,28 @@ export const updateProduct = async (id, name, price, stock, image) => {
     values.push(image);
   }
 
+  // Jika tidak ada field yang diupdate
   if (fields.length === 0) {
     throw new AppError("Tidak ada data yang diupdate", 400);
   }
 
-  if (isNaN(parsedPrice) || parsedPrice <= 0) {
-    throw new AppError("Harga harus angka > 0", 400);
-  }
+  // Jalankan update
+  const result = await productModel.updateProduct(fields, values, validId);
 
-  if (isNaN(parsedStock) || parsedStock < 0) {
-    throw new AppError("Stock tidak valid", 400);
-  }
-
-  const result = await productModel.updateProduct(fields, values, id);
-
-  if (result.affectedRows === 0) {
-    throw new AppError("Data tidak ditemukan", 404);
-  }
+  checkAffectedRows(result);
 
   return result;
 };
 
-// Hapus produk
+/**
+ * Hapus produk berdasarkan ID
+ */
 export const deleteProduct = async (id) => {
-  const parsedId = Number(id);
+  const validId = validateId(id);
 
-  if (isNaN(parsedId)) {
-    throw new AppError("ID tidak valid", 400);
-  }
+  const result = await productModel.deleteProduct(validId);
 
-  const result = await productModel.deleteProduct(parsedId);
-
-  if (result.affectedRows === 0) {
-    throw new AppError("Data tidak ditemukan", 404);
-  }
+  checkAffectedRows(result);
 
   return result;
 };
