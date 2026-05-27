@@ -188,9 +188,14 @@ import { ref } from "vue"
 import { storeToRefs } from "pinia"
 import { useAuthStore } from "@/stores/auth"
 import { ShoppingCart, User } from "lucide-vue-next"
+import { watch } from "vue"
 
 const auth = useAuthStore()
 const { isLoggedIn } = storeToRefs(auth)
+
+watch(isLoggedIn, (val) => {
+  console.log("LOGIN STATUS:", val)
+})
 
 const isMenuOpen = ref(false)
 

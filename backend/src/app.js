@@ -15,12 +15,19 @@ app.use(helmet());
 
 app.use(cors());
 app.use(express.json());
-app.use("/api", router);
 
+// STATIC FILES (UPLOAD)
+app.use('/uploads', express.static('uploads'));
+
+// ROUTER API
+app.use('/api', router);
+
+// 404 HANDLER
 app.use((req, res, next) => {
-    next(new AppError('Route tidak ditemukan', 404));
+  next(new AppError('Route tidak ditemukan', 404));
 });
 
+// ERROR HANDLER
 app.use(errorMiddleware);
 
 export default app;

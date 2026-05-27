@@ -163,7 +163,7 @@
           hover:shadow-xl hover:-translate-y-1 transition duration-300"
         >
           <div class="relative">
-            <img :src="item.image" class="h-48 w-full object-cover" />
+            <img :src="`http://localhost:3200/uploads/${item.image}`" class="h-48 w-full object-cover" />
 
             <!-- badge -->
             <span class="absolute top-3 left-3 text-xs bg-white px-2 py-1 rounded-full shadow">
@@ -176,7 +176,7 @@
             <p class="text-sm text-gray-500 mt-1">{{ item.desc }}</p>
 
             <div class="flex items-center justify-between mt-4">
-              <span class="font-bold text-[#b45309]">{{ item.price }}</span>
+              <span class="font-bold text-[#b45309]">{{ formatRupiah(item.price) }}</span>
 
               <button
                 class="bg-[#3f4f1a] text-white px-4 py-1 rounded-full text-sm 
@@ -195,10 +195,11 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue"
 import { ShoppingCart, User } from "lucide-vue-next";
 import { storeToRefs } from "pinia"
 import { useAuthStore } from "@/stores/auth"
+import api from "@/utils/api"
 
 const auth = useAuthStore()
 const { isLoggedIn } = storeToRefs(auth)
@@ -209,102 +210,25 @@ const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value
 }
 
-const products = ref([
-  {
-    id: 1,
-    name: "Sourdough Loaf",
-    desc: "Classic sourdough with crispy crust",
-    price: "Rp 45.000",
-    category: "Bread",
-    image: "https://images.unsplash.com/photo-1549931319-a545dcf3bc73"
-  },
-  {
-    id: 2,
-    name: "Rustic Brown Bread",
-    desc: "Hearty bread with crunchy seeds",
-    price: "Rp 38.000",
-    category: "Bread",
-    image: "https://images.unsplash.com/photo-1509440159596-0249088772ff"
-  },
-  {
-    id: 3,
-    name: "Artisan Bread Basket",
-    desc: "Selection of fresh artisan breads",
-    price: "Rp 85.000",
-    category: "Bread",
-    image: "https://images.unsplash.com/photo-1514516870926-2059896f3a84"
-  },
-  {
-    id: 4,
-    name: "Whole Wheat Loaf",
-    desc: "Healthy whole wheat bread",
-    price: "Rp 32.000",
-    category: "Bread",
-    image: "https://images.unsplash.com/photo-1585478259715-1c1f93bdfd69"
-  },
-  {
-    id: 5,
-    name: "Chocolate Cake",
-    desc: "Rich chocolate layered cake",
-    price: "Rp 120.000",
-    category: "Cake",
-    image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587"
-  },
-  {
-    id: 6,
-    name: "Strawberry Cake",
-    desc: "Fresh cream with strawberries",
-    price: "Rp 110.000",
-    category: "Cake",
-    image: "https://images.unsplash.com/photo-1559622214-f8a9850965bb"
-  },
-  {
-    id: 7,
-    name: "Cheesecake",
-    desc: "Smooth creamy cheesecake",
-    price: "Rp 95.000",
-    category: "Cake",
-    image: "https://images.unsplash.com/photo-1565958011703-44f9829ba187"
-  },
-  {
-    id: 8,
-    name: "Croissant",
-    desc: "Flaky buttery croissant",
-    price: "Rp 25.000",
-    category: "Pastry",
-    image: "https://images.unsplash.com/photo-1509440159596-0249088772ff"
-  },
-  {
-    id: 9,
-    name: "Almond Croissant",
-    desc: "Croissant with almond filling",
-    price: "Rp 30.000",
-    category: "Pastry",
-    image: "https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b"
-  },
-  {
-    id: 10,
-    name: "Pain au Chocolat",
-    desc: "Chocolate filled pastry",
-    price: "Rp 28.000",
-    category: "Pastry",
-    image: "https://images.unsplash.com/photo-1608198093002-ad4e005484ec"
-  },
-  {
-    id: 11,
-    name: "Cinnamon Roll",
-    desc: "Sweet cinnamon swirl",
-    price: "Rp 27.000",
-    category: "Pastry",
-    image: "https://images.unsplash.com/photo-1589308078059-be1415eab4c3"
-  },
-  {
-    id: 12,
-    name: "Blueberry Muffin",
-    desc: "Soft muffin with blueberries",
-    price: "Rp 22.000",
-    category: "Pastry",
-    image: "https://images.unsplash.com/photo-1585238342024-78d387f4a707"
+const products = ref([])
+
+onMounted(async () => {
+  try {
+    const res = await api.get("/products")
+
+    console.log("API RESPONSE:", res.data)
+
+    products.value = res.data
+  } catch (err) {
+    console.error("ERROR:", err.response || err)
   }
-]);
+})
+
+const formatRupiah = (value) => {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0
+  }).format(value)
+}
 </script>

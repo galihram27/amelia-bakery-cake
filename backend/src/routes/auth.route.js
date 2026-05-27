@@ -31,7 +31,10 @@ router.post("/login", login);
  *   - jika valid → lanjut ke controller dashboard
  *   - jika tidak → error (unauthorized)
  */
-router.get("/dashboard", authenticate, dashboard);
 
-// Export router supaya bisa digunakan di app utama (app.js)
+router.get("/me", authenticate, (req, res) => {
+  res.json(req.user)
+})
+
+// Export router supaya bisa digunakan di index.js
 export default router;

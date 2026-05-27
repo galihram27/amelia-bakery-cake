@@ -12,6 +12,7 @@ export const authenticate = (req, res, next) => {
 
     // ambil token
     const token = authHeader.split(" ")[1];
+    console.log("TOKEN DARI FRONTEND:", token);
 
     // verifikasi token
     const decoded = verifyToken(token);
@@ -21,6 +22,7 @@ export const authenticate = (req, res, next) => {
 
     next();
   } catch (err) {
-    next(new AppError("Token tidak valid atau sudah expired", 401));
+    console.error("JWT ERROR:", err.message);
+    next(err);
   }
 };

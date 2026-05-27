@@ -5,10 +5,11 @@ import * as productController from "../controllers/product.controller.js";
 
 const router = express.Router();
 
+// Public
 // Menampilkan produk
 router.get("/", productController.getProduct);
 
-// Admin only
+// Admin Routes
 router.use(authenticate);
 router.use(authorizeRoles("admin"));
 

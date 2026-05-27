@@ -56,10 +56,20 @@
           </span>
         </router-link>
 
-        <router-link v-if="!auth.isLoggedIn" to="/login"> Sign In </router-link>
+        <router-link
+          v-if="!isLoggedIn"
+          to="/login"
+          class="bg-[#F5F3E7] text-[#3F4F1A] px-5 py-2 rounded-full hover:bg-[#e6e2c3] transition font-medium"
+        >
+          Sign In
+        </router-link>
 
-        <router-link v-else to="/profile">
-          <User class="w-6 h-6" />
+        <router-link
+          v-else
+          to="/profile"
+          class="text-white hover:text-[#F5F3E7] transition"
+        >
+          <User class="w-6 h-6 cursor-pointer" />
         </router-link>
       </div>
 
@@ -100,6 +110,7 @@
           Sign in to continue your bakery experience
         </p>
 
+        <!-- Username -->
         <form @submit.prevent="handleLogin" class="space-y-4">
           <input
             v-model="username"
@@ -108,6 +119,7 @@
             class="w-full px-4 py-3 rounded-xl bg-white border border-[#e5e7db] text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#3F4F1A]"
           />
 
+          <!-- Password -->
           <div class="relative">
             <input
               v-model="password"
@@ -116,7 +128,7 @@
               class="w-full px-4 py-3 pr-10 rounded-xl bg-white border border-[#e5e7db] text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#3F4F1A]"
             />
 
-            <!-- ICON TOGGLE -->
+            <!-- ICON TOGGLE (Show Password) -->
             <button
               type="button"
               @click="showPassword = !showPassword"
@@ -131,6 +143,7 @@
             {{ errorMessage }}
           </p>
 
+          <!-- Login Button -->
           <button
             type="submit"
             class="w-full mt-4 bg-[#3F4F1A] text-white font-medium py-3 rounded-full hover:bg-[#2f3a14] hover:shadow-lg transition"
@@ -152,19 +165,21 @@
 
 <script setup>
 import { ref, watch } from 'vue'
-import axios from 'axios'
-import { useAuthStore } from '@/stores/auth'
-import { Eye, EyeOff } from "lucide-vue-next"
+import { Eye, EyeOff } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
+import api from '@/utils/api'
+import { useAuthStore } from '@/stores/auth'
+import { storeToRefs } from 'pinia'
 
 const username = ref('')
 const password = ref('')
 const errorMessage = ref('')
-const showPassword = ref(false);
+const showPassword = ref(false)
 
 const router = useRouter()
 
 const auth = useAuthStore()
+const { isLoggedIn } = storeToRefs(auth)
 
 watch([username, password], () => {
   errorMessage.value = ''
@@ -174,16 +189,19 @@ const handleLogin = async () => {
   try {
     errorMessage.value = '' // reset error
 
-    const res = await axios.post('http://localhost:3200/api/auth/login', {
+    const res = await api.post('/auth/login', {
       username: username.value.trim().toLowerCase(),
       password: password.value,
     })
 
-    auth.login(res.data.token)
+    await auth.login(res.data.token)
+
+    console.log('TOKEN:', auth.token)
+
     router.push('/')
   } catch (err) {
-    console.log("FULL ERROR:", err);
-    console.log("RESPONSE:", err.response);
+    console.log('FULL ERROR:', err)
+    console.log('RESPONSE:', err.response)
     errorMessage.value = err.response?.data?.message || 'Username atau password salah'
   }
 }
