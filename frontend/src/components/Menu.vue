@@ -1,6 +1,5 @@
 <template>
   <div class="min-h-screen w-full pt-24 bg-[#f5f3e7]">
-
     <!-- NAVBAR -->
     <nav
       class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 bg-[#3F4F1A] text-white shadow-md"
@@ -47,9 +46,7 @@
       <div class="hidden md:flex items-center gap-4">
         <!-- Cart Icon -->
         <router-link to="/cart" class="relative">
-          <ShoppingCart
-            class="w-6 h-6 text-white hover:text-[#F5F3E7] transition"
-          />
+          <ShoppingCart class="w-6 h-6 text-white hover:text-[#F5F3E7] transition" />
 
           <!-- optional badge -->
           <span
@@ -67,11 +64,7 @@
           Sign In
         </router-link>
 
-        <router-link
-          v-else
-          to="/profile"
-          class="text-white hover:text-[#F5F3E7] transition"
-        >
+        <router-link v-else to="/profile" class="text-white hover:text-[#F5F3E7] transition">
           <User class="w-6 h-6" />
         </router-link>
       </div>
@@ -94,76 +87,79 @@
 
     <!-- 🔥 HEADER (FULL WIDTH HERO STYLE) -->
     <section class="relative px-12 py-20 text-white overflow-hidden">
-
       <!-- background gradient -->
-      <div class="absolute inset-0 bg-gradient-to-br from-[#3f4f1a] via-[#4b5f1f] to-[#2f3b14]"></div>
+      <div
+        class="absolute inset-0 bg-gradient-to-br from-[#3f4f1a] via-[#4b5f1f] to-[#2f3b14]"
+      ></div>
 
       <!-- glow effect -->
-      <div class="absolute w-[500px] h-[500px] bg-[#f5f3e7]/10 blur-3xl rounded-full top-[-100px] left-[-100px]"></div>
-      <div class="absolute w-[400px] h-[400px] bg-[#f5f3e7]/10 blur-3xl rounded-full bottom-[-100px] right-[-100px]"></div>
+      <div
+        class="absolute w-[500px] h-[500px] bg-[#f5f3e7]/10 blur-3xl rounded-full top-[-100px] left-[-100px]"
+      ></div>
+      <div
+        class="absolute w-[400px] h-[400px] bg-[#f5f3e7]/10 blur-3xl rounded-full bottom-[-100px] right-[-100px]"
+      ></div>
 
       <!-- content -->
       <div class="relative z-10 max-w-4xl">
-        <h1 class="text-4xl md:text-5xl font-bold mb-4 text-[#f5f3e7]">
-          Our Menu
-        </h1>
+        <h1 class="text-4xl md:text-5xl font-bold mb-4 text-[#f5f3e7]">Our Menu</h1>
 
-        <p class="text-[#e6e2c3] mb-8">
-          Freshly baked every morning — pick your favourite
-        </p>
+        <p class="text-[#e6e2c3] mb-8">Freshly baked every morning — pick your favourite</p>
 
-        <!-- search + sort -->
+        <!-- Search -->
         <div class="flex flex-col md:flex-row gap-4">
           <input
+            v-model="searchQuery"
             type="text"
             placeholder="Search breads, cakes, pastries..."
-            class="w-full md:w-1/2 px-4 py-3 rounded-xl bg-white/10 border border-white/20 
-            placeholder-[#e6e2c3] text-white focus:outline-none focus:ring-2 focus:ring-[#f5f3e7]"
+            class="w-full md:w-1/2 px-4 py-3 rounded-xl bg-white/10 border border-white/20 placeholder-[#e6e2c3] text-white focus:outline-none focus:ring-2 focus:ring-[#f5f3e7]"
           />
 
+          <!-- Sort -->
           <select
+            v-model="sortOption"
             class="px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white"
           >
-            <option class="text-black">Sort: Default</option>
-            <option class="text-black">Price Low to High</option>
-            <option class="text-black">Price High to Low</option>
+            <option value="default" class="text-black">Sort: Default</option>
+            <option value="low" class="text-black">Price Low to High</option>
+            <option value="high" class="text-black">Price High to Low</option>
           </select>
         </div>
 
         <!-- category -->
         <div class="flex flex-wrap gap-3 mt-6">
           <button class="bg-[#f5f3e7] text-[#3f4f1a] px-4 py-2 rounded-full text-sm font-semibold">
-            All Items (12)
+            All Items ({{ sortedProducts.length }})
           </button>
           <button class="border border-white/30 px-4 py-2 rounded-full text-sm hover:bg-white/10">
-            🍞 Bread
+            Bread
           </button>
           <button class="border border-white/30 px-4 py-2 rounded-full text-sm hover:bg-white/10">
-            🎂 Cakes
+            Cakes
           </button>
           <button class="border border-white/30 px-4 py-2 rounded-full text-sm hover:bg-white/10">
-            🥐 Pastries
+            Pastries
           </button>
         </div>
       </div>
     </section>
 
-    <!-- 🔥 PRODUCT SECTION (DIFFERENT BACKGROUND) -->
+    <!-- PRODUCT SECTION (DIFFERENT BACKGROUND) -->
     <section class="px-12 py-16 bg-[#f9f6ee]">
-
-      <p class="text-gray-600 mb-6">Showing 12 products</p>
+      <p class="text-gray-600 mb-6">Showing ({{ sortedProducts.length }}) products</p>
 
       <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
-
         <!-- card -->
         <div
-          v-for="item in products"
+          v-for="item in sortedProducts"
           :key="item.id"
-          class="bg-white rounded-2xl shadow-md overflow-hidden 
-          hover:shadow-xl hover:-translate-y-1 transition duration-300"
+          class="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl hover:-translate-y-1 transition duration-300"
         >
           <div class="relative">
-            <img :src="`http://localhost:3200/uploads/${item.image}`" class="h-48 w-full object-cover" />
+            <img
+              :src="`http://localhost:3200/uploads/${item.image}`"
+              class="h-48 w-full object-cover"
+            />
 
             <!-- badge -->
             <span class="absolute top-3 left-3 text-xs bg-white px-2 py-1 rounded-full shadow">
@@ -179,56 +175,79 @@
               <span class="font-bold text-[#b45309]">{{ formatRupiah(item.price) }}</span>
 
               <button
-                class="bg-[#3f4f1a] text-white px-4 py-1 rounded-full text-sm 
-                hover:bg-[#2f3b14] hover:scale-105 transition"
+                class="bg-[#3f4f1a] text-white px-4 py-1 rounded-full text-sm hover:bg-[#2f3b14] hover:scale-105 transition"
               >
                 + Add
               </button>
             </div>
           </div>
         </div>
-
       </div>
     </section>
-
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue"
-import { ShoppingCart, User } from "lucide-vue-next";
-import { storeToRefs } from "pinia"
-import { useAuthStore } from "@/stores/auth"
-import api from "@/utils/api"
+import { ref, onMounted, computed } from 'vue'
+import { ShoppingCart, User } from 'lucide-vue-next'
+import { storeToRefs } from 'pinia'
+import { useAuthStore } from '@/stores/auth'
+import api from '@/utils/api'
 
 const auth = useAuthStore()
 const { isLoggedIn } = storeToRefs(auth)
 
 const isMenuOpen = ref(false)
+const searchQuery = ref('')
+const sortOption = ref('default')
+
+const products = ref([])
+
+const filteredProducts = computed(() => {
+  return products.value.filter(item =>
+    item.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+  )
+})
+
+const sortedProducts = computed(() => {
+  const data = [...filteredProducts.value]
+
+  if (sortOption.value === 'default') {
+    return data.sort((a, b) => a.name.localeCompare(b.name))
+  }
+
+  if (sortOption.value === 'low') {
+    return data.sort((a, b) => a.price - b.price)
+  }
+
+  if (sortOption.value === 'high') {
+    return data.sort((a, b) => b.price - a.price)
+  }
+
+  return data
+})
 
 const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value
 }
 
-const products = ref([])
-
 onMounted(async () => {
   try {
-    const res = await api.get("/products")
+    const res = await api.get('/products')
 
-    console.log("API RESPONSE:", res.data)
+    console.log('API RESPONSE:', res.data)
 
     products.value = res.data
   } catch (err) {
-    console.error("ERROR:", err.response || err)
+    console.error('ERROR:', err.response || err)
   }
 })
 
 const formatRupiah = (value) => {
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    minimumFractionDigits: 0
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
   }).format(value)
 }
 </script>
