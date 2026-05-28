@@ -45,16 +45,16 @@
 
       <div class="hidden md:flex items-center gap-4">
         <!-- Cart Icon -->
-        <router-link to="/cart" class="relative">
+        <div class="relative cursor-pointer cart-button" @click.stop="toggleCart">
           <ShoppingCart class="w-6 h-6 text-white hover:text-[#F5F3E7] transition" />
 
-          <!-- optional badge -->
+          <!-- jumlah item -->
           <span
             class="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full"
           >
-            2
+            {{ cart.totalItems }}
           </span>
-        </router-link>
+        </div>
 
         <router-link
           v-if="!isLoggedIn"
@@ -85,7 +85,73 @@
       </div>
     </nav>
 
-    <!-- 🔥 HEADER (FULL WIDTH HERO STYLE) -->
+    <!-- MINI CART-->
+    <div
+      v-if="showCart"
+      @click.stop
+      class="cart-popup fixed right-6 top-20 w-96 bg-white text-black rounded-2xl shadow-xl p-4 z-50"
+    >
+      <h3 class="font-bold text-lg mb-3">Your Cart</h3>
+
+      <!-- Jika kosong -->
+      <p v-if="cart.items.length === 0" class="text-gray-500 text-sm">Cart is empty</p>
+      <div v-else :class="['space-y-4', cart.items.length > 5 ? 'max-h-60 overflow-y-auto' : '']">
+        <div
+          v-for="item in cart.items"
+          :key="item.id"
+          class="flex justify-between items-center gap-3 py-1 last:border-none"
+        >
+          <!-- IMAGE -->
+          <div class="flex items-center gap-3">
+            <!-- gambar -->
+            <img
+              :src="`http://localhost:3200/uploads/${item.image}`"
+              class="w-12 h-12 object-cover rounded-lg"
+            />
+
+            <!-- INFO -->
+            <div>
+              <p class="font-semibold text-sm">{{ item.name }}</p>
+              <p class="text-xs text-gray-500">
+                {{ formatRupiah(item.price) }}
+              </p>
+            </div>
+          </div>
+
+          <!-- QTY BUTTON -->
+          <div class="flex items-center gap-2">
+            <button @click.stop="cart.decreaseQty(item.id)" class="cursor-pointer px-2 bg-gray-200 rounded">
+              -
+            </button>
+
+            <span>{{ item.qty }}</span>
+
+            <button @click.stop="cart.increaseQty(item.id)" class="cursor-pointer px-2 bg-gray-200 rounded">
+              +
+            </button>
+          </div>
+        </div>
+
+        <!-- total -->
+        <div v-if="cart.items.length > 0" class="mt-4 border-t pt-3">
+          <p class="text-sm">
+            Total Items: <b>{{ cart.totalItems }}</b>
+          </p>
+          <p class="text-sm">
+            Total Price: <b>{{ formatRupiah(cart.totalPrice) }}</b>
+          </p>
+
+          <router-link
+            to="/cart"
+            class="block mt-3 text-center bg-[#3f4f1a] text-white py-2 rounded-xl"
+          >
+            Go to Cart
+          </router-link>
+        </div>
+      </div>
+    </div>
+
+    <!-- HEADER (FULL WIDTH HERO STYLE) -->
     <section class="relative px-12 py-20 text-white overflow-hidden">
       <!-- background gradient -->
       <div
@@ -175,7 +241,8 @@
               <span class="font-bold text-[#b45309]">{{ formatRupiah(item.price) }}</span>
 
               <button
-                class="bg-[#3f4f1a] text-white px-4 py-1 rounded-full text-sm hover:bg-[#2f3b14] hover:scale-105 transition"
+                @click="cart.addToCart(item)"
+                class="cursor-pointer bg-[#3f4f1a] text-white px-4 py-1 rounded-full text-sm hover:bg-[#2f3b14] hover:scale-105 transition"
               >
                 + Add
               </button>
@@ -188,24 +255,48 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, onBeforeUnmount } from 'vue'
 import { ShoppingCart, User } from 'lucide-vue-next'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/stores/auth'
+import { useCartStore } from '@/stores/cart'
 import api from '@/utils/api'
 
 const auth = useAuthStore()
 const { isLoggedIn } = storeToRefs(auth)
 
+const cart = useCartStore()
+
 const isMenuOpen = ref(false)
 const searchQuery = ref('')
 const sortOption = ref('default')
 
+const showCart = ref(false)
+
+const toggleCart = () => {
+  showCart.value = !showCart.value
+}
+
+const handleClickOutside = (e) => {
+  const isCartButton = e.target.closest('.cart-button')
+  const isCartPopup = e.target.closest('.cart-popup')
+
+  if (!isCartButton && !isCartPopup) {
+    showCart.value = false
+  }
+}
+
+onMounted(() => {})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('click', handleClickOutside)
+})
+
 const products = ref([])
 
 const filteredProducts = computed(() => {
-  return products.value.filter(item =>
-    item.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+  return products.value.filter((item) =>
+    item.name.toLowerCase().includes(searchQuery.value.toLowerCase()),
   )
 })
 
@@ -232,6 +323,8 @@ const toggleMenu = () => {
 }
 
 onMounted(async () => {
+  window.addEventListener('click', handleClickOutside)
+
   try {
     const res = await api.get('/products')
 
