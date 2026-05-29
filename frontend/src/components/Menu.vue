@@ -95,6 +95,8 @@
 
       <!-- Jika kosong -->
       <p v-if="cart.items.length === 0" class="text-gray-500 text-sm">Cart is empty</p>
+
+      <!-- Jika item lebih dari 0 -->
       <div v-else :class="['space-y-4', cart.items.length > 5 ? 'max-h-60 overflow-y-auto' : '']">
         <div
           v-for="item in cart.items"
@@ -285,8 +287,6 @@ const handleClickOutside = (e) => {
     showCart.value = false
   }
 }
-
-onMounted(() => {})
 
 onBeforeUnmount(() => {
   window.removeEventListener('click', handleClickOutside)
