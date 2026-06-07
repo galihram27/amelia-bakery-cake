@@ -48,15 +48,13 @@
       <div class="hidden md:flex items-center gap-4">
         <!-- Cart Icon -->
         <router-link to="/cart" class="relative">
-          <ShoppingCart
-            class="w-6 h-6 text-white hover:text-[#F5F3E7] transition"
-          />
-
+          <ShoppingCart class="w-6 h-6 text-white hover:text-[#F5F3E7] transition" />
+          
           <!-- optional badge -->
           <span
             class="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full"
           >
-            2
+            {{ cart.totalItems }}
           </span>
         </router-link>
 
@@ -68,11 +66,7 @@
           Sign In
         </router-link>
 
-        <router-link
-          v-else
-          to="/profile"
-          class="text-white hover:text-[#F5F3E7] transition"
-        >
+        <router-link v-else to="/profile" class="text-white hover:text-[#F5F3E7] transition">
           <User class="w-6 h-6 cursor-pointer" />
         </router-link>
       </div>
@@ -94,29 +88,25 @@
     </nav>
 
     <!-- HERO -->
-    <section
-      class="flex flex-col md:flex-row items-center justify-between px-8 md:px-12 py-16"
-    >
+    <section class="flex flex-col md:flex-row items-center justify-between px-8 md:px-12 py-16">
       <div class="max-w-xl">
-        <h1
-          class="font-serif text-5xl md:text-7xl font-semibold text-[#3F4F1A] mb-6 leading-tight"
-        >
+        <h1 class="font-serif text-5xl md:text-7xl font-semibold text-[#3F4F1A] mb-6 leading-tight">
           Handmade Bakery<br />with Love
         </h1>
 
         <p class="text-lg text-gray-700 mb-6 leading-relaxed">
-          Discover fresh bread, premium cakes, and artisan pastries crafted
-          daily with natural ingredients.
+          Discover fresh bread, premium cakes, and artisan pastries crafted daily with natural
+          ingredients.
         </p>
 
         <div class="flex gap-4">
           <router-link to="/menu">
-          <button
-            class="bg-[#3F4F1A] text-white px-6 py-3 rounded-full hover:bg-[#2f3a14] transition shadow font-medium"
-          >
-            Shop Now
-          </button>
-        </router-link>
+            <button
+              class="bg-[#3F4F1A] text-white px-6 py-3 rounded-full hover:bg-[#2f3a14] transition shadow font-medium"
+            >
+              Shop Now
+            </button>
+          </router-link>
         </div>
       </div>
 
@@ -135,21 +125,15 @@
 
     <!-- PRODUCTS -->
     <section class="px-8 md:px-12 pb-20">
-      <h2 class="font-serif text-4xl font-semibold text-[#3F4F1A] mb-8">
-        Featured Products
-      </h2>
+      <h2 class="font-serif text-4xl font-semibold text-[#3F4F1A] mb-8">Featured Products</h2>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div
           class="bg-white/80 backdrop-blur border border-[#e5e7db] rounded-2xl p-6 shadow-md hover:shadow-xl hover:-translate-y-1 transition"
         >
           <div class="text-5xl mb-4">🍞</div>
-          <h3 class="text-xl font-semibold text-[#3F4F1A] mb-2 font-serif">
-            Classic Bread
-          </h3>
-          <p class="text-gray-600 mb-4">
-            Soft, fresh, and baked daily with premium wheat flour.
-          </p>
+          <h3 class="text-xl font-semibold text-[#3F4F1A] mb-2 font-serif">Classic Bread</h3>
+          <p class="text-gray-600 mb-4">Soft, fresh, and baked daily with premium wheat flour.</p>
           <span class="font-semibold text-[#2E2E2E]">$3.50</span>
         </div>
 
@@ -157,12 +141,8 @@
           class="bg-white/80 backdrop-blur border border-[#e5e7db] rounded-2xl p-6 shadow-md hover:shadow-xl hover:-translate-y-1 transition"
         >
           <div class="text-5xl mb-4">🎂</div>
-          <h3 class="text-xl font-semibold text-[#3F4F1A] mb-2 font-serif">
-            Chocolate Cake
-          </h3>
-          <p class="text-gray-600 mb-4">
-            Rich chocolate layers with smooth creamy frosting.
-          </p>
+          <h3 class="text-xl font-semibold text-[#3F4F1A] mb-2 font-serif">Chocolate Cake</h3>
+          <p class="text-gray-600 mb-4">Rich chocolate layers with smooth creamy frosting.</p>
           <span class="font-semibold text-[#2E2E2E]">$12.00</span>
         </div>
 
@@ -170,12 +150,8 @@
           class="bg-white/80 backdrop-blur border border-[#e5e7db] rounded-2xl p-6 shadow-md hover:shadow-xl hover:-translate-y-1 transition"
         >
           <div class="text-5xl mb-4">🥐</div>
-          <h3 class="text-xl font-semibold text-[#3F4F1A] mb-2 font-serif">
-            Butter Croissant
-          </h3>
-          <p class="text-gray-600 mb-4">
-            Flaky, buttery layers baked to golden perfection.
-          </p>
+          <h3 class="text-xl font-semibold text-[#3F4F1A] mb-2 font-serif">Butter Croissant</h3>
+          <p class="text-gray-600 mb-4">Flaky, buttery layers baked to golden perfection.</p>
           <span class="font-semibold text-[#2E2E2E]">$4.20</span>
         </div>
       </div>
@@ -184,17 +160,24 @@
 </template>
 
 <script setup>
-import { ref } from "vue"
-import { storeToRefs } from "pinia"
-import { useAuthStore } from "@/stores/auth"
-import { ShoppingCart, User } from "lucide-vue-next"
-import { watch } from "vue"
+import { ref, watch, onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useAuthStore } from '@/stores/auth'
+import { useCartStore } from '@/stores/cart'
+import { ShoppingCart, User } from 'lucide-vue-next'
 
 const auth = useAuthStore()
 const { isLoggedIn } = storeToRefs(auth)
+const cart = useCartStore()
+
+onMounted(() => {
+  if (isLoggedIn.value) {
+    cart.fetchCart()
+  }
+})
 
 watch(isLoggedIn, (val) => {
-  console.log("LOGIN STATUS:", val)
+  console.log('LOGIN STATUS:', val)
 })
 
 const isMenuOpen = ref(false)

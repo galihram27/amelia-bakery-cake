@@ -120,13 +120,13 @@
             </div>
           </div>
 
-          <!-- QTY BUTTON -->
+          <!-- QUANTITY BUTTON -->
           <div class="flex items-center gap-2">
             <button @click.stop="cart.decreaseQty(item.id)" class="cursor-pointer px-2 bg-gray-200 rounded">
               -
             </button>
 
-            <span>{{ item.qty }}</span>
+            <span>{{ item.quantity }}</span>
 
             <button @click.stop="cart.increaseQty(item.id)" class="cursor-pointer px-2 bg-gray-200 rounded">
               +
@@ -280,13 +280,19 @@ const toggleCart = () => {
 }
 
 const handleClickOutside = (e) => {
-  const isCartButton = e.target.closest('.cart-button')
-  const isCartPopup = e.target.closest('.cart-popup')
+  setTimeout(() => {
+    const isCartButton = e.target.closest('.cart-button')
+    const isCartPopup = e.target.closest('.cart-popup')
 
-  if (!isCartButton && !isCartPopup) {
-    showCart.value = false
-  }
+    if (!isCartButton && !isCartPopup) {
+      showCart.value = false
+    }
+  }, 0)
 }
+
+onMounted(() => {
+  window.addEventListener('click', handleClickOutside)
+})
 
 onBeforeUnmount(() => {
   window.removeEventListener('click', handleClickOutside)
@@ -300,6 +306,7 @@ const filteredProducts = computed(() => {
   )
 })
 
+// Filter
 const sortedProducts = computed(() => {
   const data = [...filteredProducts.value]
 
@@ -322,13 +329,19 @@ const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value
 }
 
+// Cart
+onMounted(() => {
+  if (isLoggedIn.value) {
+    cart.fetchCart()
+  }
+})
+
+// Product
 onMounted(async () => {
   window.addEventListener('click', handleClickOutside)
 
   try {
     const res = await api.get('/products')
-
-    console.log('API RESPONSE:', res.data)
 
     products.value = res.data
   } catch (err) {

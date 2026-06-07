@@ -123,12 +123,14 @@
 
         <!-- LOGOUT -->
         <div class="mt-10 text-center">
-          <button
-            @click="logout"
-            class="bg-red-500 text-white px-6 py-2 rounded-full hover:bg-red-600 transition"
-          >
-            Logout
-          </button>
+          <router-link to="/">
+            <button
+              @click="logout"
+              class="cursor-pointer bg-red-500 text-white px-6 py-2 rounded-full hover:bg-red-600 transition"
+            >
+              Logout
+            </button>
+          </router-link>
         </div>
       </div>
     </section>

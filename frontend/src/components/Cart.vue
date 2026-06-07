@@ -116,17 +116,17 @@
               </p>
             </div>
 
-            <!-- QTY -->
+            <!-- QUANTITY -->
             <div class="flex items-center gap-3 mt-2 bg-[#F5F3E7] w-fit px-3 py-1 rounded-full">
-              <button @click.stop="cart.decreaseQty(item.id)">-</button>
-              <span>{{ item.qty }}</span>
-              <button @click.stop="cart.increaseQty(item.id)">+</button>
+              <button @click.stop="cart.decreaseQty(item.id)" class="cursor-pointer">-</button>
+              <span>{{ item.quantity }}</span>
+              <button @click.stop="cart.increaseQty(item.id)" class="cursor-pointer">+</button>
             </div>
 
             <div class="text-right">
               <p class="text-sm text-gray-400">Subtotal</p>
               <p class="font-semibold text-[#3F4F1A]">
-                {{ formatRupiah(item.qty * item.price) }}
+                {{ formatRupiah(Subtotal(item)) }}
               </p>
             </div>
           </div>
@@ -140,7 +140,7 @@
           <div class="space-y-2 text-sm">
             <div v-for="item in cart.items" :key="item.id" class="flex justify-between">
               <span>{{ item.name }}</span>
-              <span>{{ formatRupiah(item.qty * item.price) }}</span>
+              <span>{{ formatRupiah(Subtotal(item)) }}</span>
             </div>
 
             <hr class="my-4" />
@@ -162,7 +162,7 @@
             <!-- CHECKOUT -->
             <router-link to="/checkout">
               <button
-                class="w-full mt-6 bg-[#3F4F1A] text-white py-3 rounded-full hover:bg-[#2f3a14] transition"
+                class="cursor-pointer w-full mt-6 bg-[#3F4F1A] text-white py-3 rounded-full hover:bg-[#2f3a14] transition"
               >
                 Checkout
               </button>
@@ -179,7 +179,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { ShoppingCart, User } from 'lucide-vue-next'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/stores/auth'
@@ -187,8 +187,13 @@ import { useCartStore } from '@/stores/cart'
 
 const auth = useAuthStore()
 const { isLoggedIn } = storeToRefs(auth)
-
 const cart = useCartStore()
+
+onMounted(() => {
+  if (isLoggedIn.value) {
+    cart.fetchCart()
+  }
+})
 
 const isMenuOpen = ref(false)
 
@@ -197,10 +202,14 @@ const toggleMenu = () => {
 }
 
 const subtotal = computed(() =>
-  cart.items.reduce((acc, item) => acc + Number(item.price) * item.qty, 0),
+  cart.items.reduce((acc, item) => acc + Number(item.price) * item.quantity, 0),
 )
 
 const delivery = 15000
+
+const Subtotal = (item) => {
+  return Number(item.price) * item.quantity
+}
 
 const formatRupiah = (value) => {
   return new Intl.NumberFormat('id-ID', {
